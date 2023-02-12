@@ -3,4 +3,4 @@
 最新exe下载:http://wdg1122jqrsys.zxj6002.xyz/jqr2.2.zip
 
 官网:https://eu27770457-12.icoc.ws/
-
+非开发者直接下载exe就行了
