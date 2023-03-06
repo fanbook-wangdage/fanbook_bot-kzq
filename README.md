@@ -12,5 +12,5 @@
 删除无关库
 修复bug:
 严重：函数一直调用init(autoreset=True)初始化后导致在第13次打印后变得非常慢
-
+http://fanbook_wdgsys.bailituya.com/jqr-3.0.exe.zip
 此版本之后会开源
