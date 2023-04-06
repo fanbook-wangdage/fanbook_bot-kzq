@@ -6,9 +6,9 @@
 非开发者直接下载exe就行了
 # -3.6
 新增：  
-新版本检查
-优化：
-高级命令行
-勋章功能
-最新下载： http://fanbook_wdgsys.bailituya.com/
-此版本实时开源
+新版本检查  
+优化：  
+高级命令行  
+勋章功能  
+最新下载： http://fanbook_wdgsys.bailituya.com/  
+此版本实时开源  
