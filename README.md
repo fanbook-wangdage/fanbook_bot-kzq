@@ -10,3 +10,6 @@
 勋章功能  
 最新下载： http://fanbook_wdgsys.bailituya.com/  
 此版本实时开源  
+  
+# -4.3  
+更新错误处理和新版本检测
