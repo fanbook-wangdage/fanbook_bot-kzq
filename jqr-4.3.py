@@ -4,6 +4,60 @@ import traceback#错误检测
 from colorama import init, Fore, Back, Style
 import urllib.request
 import time
+import platform
+import psutil
+import ctypes
+import subprocess
+import sys
+import os
+import datetime
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+
+def write_error_to_file(exception, variables):
+    # 获取当前时间
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # 构建异常信息
+    error_info = f"Error occurred on {current_time}:\n"
+    error_info += traceback.format_exc()
+
+    # 获取当前所有变量
+    variables_info = f"\nVariables at the time of exception:\n"
+    variables_info += str(variables)
+
+    # 将错误信息和变量信息写入文件
+    with open("error_log.txt", "w") as file:
+        file.write(error_info)
+        file.write(variables_info)
+
+def encrypt_error_file():
+    with open("encryption_key.txt", "rb") as key_file:
+        # 从密钥文件中读取加密密钥
+        encryption_key = key_file.read()
+
+    with open("error_log.txt", "rb") as file:
+        # 使用AES加密文件内容
+        cipher = AES.new(encryption_key, AES.MODE_EAX)
+        ciphertext, tag = cipher.encrypt_and_digest(file.read())
+
+        # 将加密后的数据写入文件
+        with open("encrypted_error_log.bin", "wb") as encrypted_file:
+            encrypted_file.write(cipher.nonce)
+            encrypted_file.write(tag)
+            encrypted_file.write(ciphertext)
+    files = os.listdir()
+    for file in files:
+        if file == "error_log.txt":
+            os.remove(file)
+
+# 获取控制台窗口句柄
+kernel32 = ctypes.windll.kernel32
+hwnd = kernel32.GetConsoleWindow()
+
+# 设置窗口标题
+if hwnd != 0:
+    kernel32.SetConsoleTitleW("王大哥-机器人控制器")
 
 init(autoreset=True)    #  初始化，并且设置颜色设置自动恢复
 def addmsg(msg, color="white"):
@@ -32,14 +86,36 @@ def generate_random_string(length):
     # 生成一个由数字组成的随机字符串
     return ''.join(random.choices('0123456789', k=length))
 
-addmsg('欢迎使用机器人快捷操作系统，你可以使用此系统完成对机器人的常用操作，每次更新都会有新功能！ 由于时间仓促，代码难免会出现问题，如遇到问题，请给王大哥私信，请保持你的软件版本为最新版本 最新下载：http://fanbook_wdgsys.bailituya.com/ [王大哥 V4.0 让机器人控制变得更简单！]',color='aqua')
-url = 'http://fanbook_wdgsys.bailituya.com/data.txt'#获取版本数据
-response = urllib.request.urlopen(url)
-data = response.read()
-datatext = data.decode('utf-8') 
-print("最新版本：",datatext)
-if float(datatext) > 4.0:
-    print("有最新版本,请去 http://fanbook_wdgsys.bailituya.com/ 下载最新版本")
+addmsg('欢迎使用机器人快捷操作系统，你可以使用此系统完成对机器人的常用操作，每次更新都会有新功能！ 由于时间仓促，代码难免会出现问题，如遇到问题，请前往https://fanbook.mobi/LmgLJF3N ，请保持你的软件版本为最新版本 最新下载：http://fanbook_wdgsys.bailituya.com/ [王大哥 V4.3 让机器人控制变得更简单！]',color='aqua')
+try:
+    url = 'http://fanbookwdg.bailituya.com/data.txt'#获取版本数据
+    response = urllib.request.urlopen(url)
+    data = response.read()
+    datatext = data.decode('utf-8') 
+    print("最新版本：",datatext)
+    if float(datatext) > 4.3:
+        print("有最新版本,即将更新，或者请去 http://fanbookwdg.bailituya.com/ 下载最新版本")
+        subprocess.Popen("更新.exe")
+        sys.exit()
+    os_name = platform.system()
+    os_version = platform.release()
+    os_arch = platform.machine()
+    computer_name = platform.node()
+    cpu_usage = psutil.cpu_percent()
+    #info = cpuinfo.get_cpu_info()
+    #cpu_model = info['brand_raw']
+    url='https://a1.fanbook.mobi/api/bot/0f2de7ac66727cd9fcec1ee43559c561f6abf3f1e202c5a06c2ae4a3f6cf94ab795fbfbe39ad311a18ad1ff314388d1c/sendMessage'#错误发送到私密频道
+    headers = {'content-type':"application/json;charset=utf-8"}
+    jsonfile=json.dumps({"chat_id":448843628261933056,"text":'操作系统: {} {}'.format(os_name, os_version)+' 架构: {}'.format(os_arch)+' 计算机名: {}'.format(computer_name)+' CPU负载: {}'.format(cpu_usage)})
+    postreturn=requests.post(url,data=jsonfile,headers=headers)
+except Exception as e:#检测错误
+    error=traceback.format_exc()#获取错误信息
+    addmsg('和王大哥云资源主机或fanbook通信遇到问题，前往https://fanbook.mobi/LmgLJF3N 以反馈 '+error,color='yellow')
+    cwbg='错误代码：'+error
+    url='https://a1.fanbook.mobi/api/bot/0f2de7ac66727cd9fcec1ee43559c561f6abf3f1e202c5a06c2ae4a3f6cf94ab795fbfbe39ad311a18ad1ff314388d1c/sendMessage'#错误发送到私密频道
+    headers = {'content-type':"application/json;charset=utf-8"}
+    jsonfile=json.dumps({"chat_id":448843628261933056,"text":cwbg})
+    postreturn=requests.post(url,data=jsonfile,headers=headers)
 
 while True:
     colorprint(smg2='请输入你的机器人的令牌',pcolor='bandg')
@@ -189,7 +265,7 @@ while True:
         elif a=='7':
             colorprint(smg2='请输入反馈信息',pcolor='bandg')
             c=input()
-            d='{\"type\":\"richText\",\"title\":\"反馈 V4.0'+'\",\"document\":\"[{\\\"insert\\\":\\\"'+c+'\\\"}]\"}'
+            d='{\"type\":\"richText\",\"title\":\"反馈 V4.2'+'\",\"document\":\"[{\\\"insert\\\":\\\"'+c+'\\\"}]\"}'
             url='https://a1.fanbook.mobi/api/bot/0f2de7ac66727cd9fcec1ee43559c561f6abf3f1e202c5a06c2ae4a3f6cf94ab795fbfbe39ad311a18ad1ff314388d1c/sendMessage'
             headers = {'content-type':"application/json;charset=utf-8"}
             jsonfile=json.dumps({"chat_id":448843628261933056,"text":d ,"parse_mode": "Fanbook"})
@@ -214,8 +290,8 @@ while True:
                         pygame.quit()
                         addmsg('如需其他错误码帮助，请打开https://open.fanbook.mobi/document/manage/doc/Bot%20API/API%E9%94%99%E8%AF%AF%E7%A0%81',color='aqua')
                         addmsg('—————————————————————————————————————————————',color='aqua')
-                        addmsg('关于：王大哥（#4562997）V4.0版',color='aqua')
-                        addmsg('更新日期：2023/4/7  18：30 ',color='aqua')
+                        addmsg('关于：王大哥（#4562997）V4.2版',color='aqua')
+                        addmsg('更新日期：2023/5/7  22：00 ',color='aqua')
         elif a== '8':
             colorprint(smg2='请输入频道id（如私信需要私聊id,可通过获取私聊id获取），获取方法：聊天框输入#，然后选择频道，发送后复制刚刚发送的蓝色频道名，复制后例如${#395848618357086556}，填写里面的数字395848618357086556即可',pcolor='bandg')
             pdid=input()
@@ -369,6 +445,9 @@ while True:
                 time.sleep(cis)
     except Exception as e:#检测错误
         error=traceback.format_exc()#获取错误信息
+        variables = globals()
+        write_error_to_file(e, variables)
+        encrypt_error_file()
         if 'pygame.error: video system not initialized' in error:#忽略错误
             continue
         elif 'for int()' in error:
@@ -383,7 +462,7 @@ while True:
             colorprint(smg2='发生错误，请检查参数，是否发送错误报告(报告不包含机器人令牌等敏感数据,王大哥可见)(Y/N)',pcolor='bandg')
             cw=input()
             if cw=='Y':
-                    cwbg='错误模块：'+a+' 版本号：4.0'+'，错误代码：'+error
+                    cwbg='错误模块：'+a+' 版本号：4.3'+'，错误代码：'+error
                     xwxx='{\"type\":\"richText\",\"title\":\"错误报告'+'3.1'+'\",\"document\":\"[{\\\"insert\\\":\\\"'+' '+'\\\"}]\"}'#此段富文本不支持
                     url='https://a1.fanbook.mobi/api/bot/0f2de7ac66727cd9fcec1ee43559c561f6abf3f1e202c5a06c2ae4a3f6cf94ab795fbfbe39ad311a18ad1ff314388d1c/sendMessage'#错误发送到私密频道
                     headers = {'content-type':"application/json;charset=utf-8"}
