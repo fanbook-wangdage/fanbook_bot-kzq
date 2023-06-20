@@ -1,18 +1,18 @@
 import requests#发送请求
 import json#处理数据
 import traceback#错误检测
-from colorama import init, Fore, Back, Style
-import urllib.request
-import time
-import platform
-import psutil
-import ctypes
-import subprocess
-import sys
-import os
-import datetime
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
+from colorama import init, Fore, Back, Style#样式等
+import urllib.request#请求拓展
+import time#时间模块
+import platform#系统信息获取模块
+import psutil#cpu拓展
+import ctypes#模块拓展
+import subprocess#运行程序
+import sys#系统模块
+import os#系统模块
+import datetime#时间拓展
+from Crypto.Cipher import AES#解密/加密库
+from Crypto.Random import get_random_bytesS#解密/加密库
 
 def write_error_to_file(exception, variables):
     # 获取当前时间
@@ -88,13 +88,13 @@ def generate_random_string(length):
 
 addmsg('欢迎使用机器人快捷操作系统，你可以使用此系统完成对机器人的常用操作，每次更新都会有新功能！ 由于时间仓促，代码难免会出现问题，如遇到问题，请前往https://fanbook.mobi/LmgLJF3N ，请保持你的软件版本为最新版本 最新下载：http://fanbook_wdgsys.bailituya.com/ [王大哥 V4.3 让机器人控制变得更简单！]',color='aqua')
 try:
-    url = 'http://fanbookwdg.bailituya.com/data.txt'#获取版本数据
+    url = 'http://fanbookwdg.bailituya.com/data.txt'#获取版本数据，自己存一个txt，填写最新版本号
     response = urllib.request.urlopen(url)
     data = response.read()
     datatext = data.decode('utf-8') 
     print("最新版本：",datatext)
     if float(datatext) > 4.3:
-        print("有最新版本,即将更新，或者请去 http://fanbookwdg.bailituya.com/ 下载最新版本")
+        print("有最新版本,即将更新，或者请去 http://fanbookwdg.bailituya.com/ 下载最新版本")#自己官网
         subprocess.Popen("更新.exe")
         sys.exit()
     os_name = platform.system()
