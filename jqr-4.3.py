@@ -1,18 +1,36 @@
-import requests#发送请求
-import json#处理数据
-import traceback#错误检测
-from colorama import init, Fore, Back, Style#样式等
-import urllib.request#请求拓展
-import time#时间模块
-import platform#系统信息获取模块
-import psutil#cpu拓展
-import ctypes#模块拓展
-import subprocess#运行程序
-import sys#系统模块
-import os#系统模块
-import datetime#时间拓展
-from Crypto.Cipher import AES#解密/加密库
-from Crypto.Random import get_random_bytesS#解密/加密库
+import requests
+import json
+import traceback
+import urllib.request
+import time
+import platform
+import psutil
+import ctypes
+import subprocess
+import sys
+import os
+import datetime
+import chardet
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+from pygments import highlight
+from pygments.lexers import JsonLexer
+from pygments.formatters import TerminalFormatter
+from plyer import notification
+from colorama import init, Fore, Back, Style
+
+def colorize_json(smg2,pcolor=''):
+    json_data=smg2
+    try:
+        parsed_json = json.loads(json_data)  # 解析JSON数据
+        formatted_json = json.dumps(parsed_json, indent=4)  # 格式化JSON数据
+
+        # 使用Pygments库进行语法高亮
+        colored_json = highlight(formatted_json, JsonLexer(), TerminalFormatter())
+
+        print(colored_json)
+    except json.JSONDecodeError as e:
+        print("数据解析失败,错误:", e,",原数据:",json_data)
 
 def write_error_to_file(exception, variables):
     # 获取当前时间
@@ -33,7 +51,7 @@ def write_error_to_file(exception, variables):
 
 def encrypt_error_file():
     with open("encryption_key.txt", "rb") as key_file:
-        # 从密钥文件中读取加密密钥，可以自己创建
+        # 从密钥文件中读取加密密钥
         encryption_key = key_file.read()
 
     with open("error_log.txt", "rb") as file:
@@ -50,6 +68,43 @@ def encrypt_error_file():
     for file in files:
         if file == "error_log.txt":
             os.remove(file)
+#Debug
+#------------------------------------------------------------------
+def execute_python_file(file_path):
+    try:
+        with open(file_path, 'rb') as file:
+            raw_data = file.read()
+            result = chardet.detect(raw_data)
+            encoding = result['encoding']
+        
+        with open(file_path, 'r', encoding=encoding) as file:
+            code = file.read()
+            exec(code, globals())  # 在全局命名空间中执行文件中的代码
+    
+    except Exception as e:
+        print("发生错误:", e)
+#------------------------------------------------------------------
+
+def 打印(strtext):
+    print(strtext)
+
+def 输入(sr=""):
+    input(sr)
+
+def POST请求(url,headers,jsonfile):
+    url=url
+    headers = headers
+    jsonfile=json.dumps(jsonfile)
+    postreturn=requests.post(url,data=jsonfile,headers=headers)
+    return postreturn
+
+def GET请求(url,headers,jsonfile):
+    url=url
+    headers = headers
+    jsonfile=json.dumps(jsonfile)
+    postreturn=requests.get(url,data=jsonfile,headers=headers)
+    return postreturn
+
 
 # 获取控制台窗口句柄
 kernel32 = ctypes.windll.kernel32
@@ -64,15 +119,15 @@ def addmsg(msg, color="white"):
     if color == "white":
         print(msg)
     elif color == "red":
-        print("\033[31m" + msg + "\033[39m")#红字
+        print("\033[31m" + msg + "\033[39m")
     elif color == "yellow":
-        print("\033[33m" + msg + "\033[39m")#黄字
+        print("\033[33m" + msg + "\033[39m")
     elif color == "green":
-        print("\033[32m" + msg + "\033[39m")#绿字
+        print("\033[32m" + msg + "\033[39m")
     elif color == "aqua":
-        print("\033[36m" + msg + "\033[39m")#绿底
+        print("\033[36m" + msg + "\033[39m")
 
-def colorprint(smg2,pcolor):#颜色拓展
+def colorprint(smg2,pcolor):
     if pcolor=='red':
       print(Fore.RED + smg2)
     elif pcolor=='bandg':
@@ -86,15 +141,15 @@ def generate_random_string(length):
     # 生成一个由数字组成的随机字符串
     return ''.join(random.choices('0123456789', k=length))
 
-addmsg('欢迎使用机器人快捷操作系统，你可以使用此系统完成对机器人的常用操作，每次更新都会有新功能！ 由于时间仓促，代码难免会出现问题，如遇到问题，请前往https://fanbook.mobi/LmgLJF3N ，请保持你的软件版本为最新版本 最新下载：http://fanbook_wdgsys.bailituya.com/ [王大哥 V4.3 让机器人控制变得更简单！]',color='aqua')
+addmsg('欢迎使用机器人快捷操作系统，你可以使用此系统完成对机器人的常用操作，每次更新都会有新功能！ 由于时间仓促，代码难免会出现问题，如遇到问题，请前往https://fanbook.mobi/LmgLJF3N ，请保持你的软件版本为最新版本 最新下载：http://fanbook_wdgsys.bailituya.com/ [王大哥 V4.5改进体验版 让机器人控制变得更简单！]',color='aqua')
 try:
-    url = 'http://fanbookwdg.bailituya.com/data.txt'#获取版本数据，自己存一个txt，填写最新版本号
+    url = 'http://fanbookwdg.bailituya.com/data.txt'#获取版本数据
     response = urllib.request.urlopen(url)
     data = response.read()
     datatext = data.decode('utf-8') 
     print("最新版本：",datatext)
     if float(datatext) > 4.3:
-        print("有最新版本,即将更新，或者请去 http://fanbookwdg.bailituya.com/ 下载最新版本")#自己官网
+        print("有最新版本,即将更新，或者请去 http://fanbookwdg.bailituya.com/ 下载最新版本")
         subprocess.Popen("更新.exe")
         sys.exit()
     os_name = platform.system()
@@ -124,7 +179,7 @@ while True:
     headers = {'content-type':"application/json;charset=utf-8"}
     jsonfile=json.dumps({})
     postreturn=requests.post(url,data=jsonfile,headers=headers)
-    colorprint(smg2=postreturn.text,pcolor='d')
+    colorize_json(smg2=postreturn.text,pcolor='d')
     a=str(postreturn.text)
     a=(a[6:10])
     if a=='true':#检测返回内容
@@ -170,7 +225,7 @@ while True:
                 "text": xx
                 })
                 postreturn=requests.post(url,data=jsonfile,headers=headers)
-                colorprint(smg2=postreturn.text,pcolor='d')
+                colorize_json(smg2=postreturn.text,pcolor='d')
         elif a=='2':
             colorprint(smg2='请输入频道id（如私信需要私聊id,可通过获取私聊id获取），获取方法：聊天框输入#，然后选择频道，发送后复制刚刚发送的蓝色频道名，复制后例如${#395848618357086556}，填写里面的数字395848618357086556即可',pcolor='bandg')
             pdid=input()
@@ -188,7 +243,7 @@ while True:
                     "chat_id":int(pdid)
                     })
                 postreturn=requests.post(url,data=jsonfile,headers=headers)
-                colorprint(smg2=postreturn.text,pcolor='d')
+                colorize_json(smg2=postreturn.text,pcolor='d')
         elif a=='3':
             colorprint(smg2='请输入需要建立私聊频道用户的id,输出的id为对方私聊id，获取方法：聊天框输入@，然后选择需要私信的用户，发送后复制刚才发送的蓝色用户名，复制后例如${@!395848618357086556}，填写里面的数字395848618357086556即可',pcolor='bandg')
             yhid=input()
@@ -198,7 +253,7 @@ while True:
                 "user_id":int(yhid)
                 })
             postreturn=requests.post(url,data=jsonfile,headers=headers)
-            colorprint(smg2=postreturn.text,pcolor='d')
+            colorize_json(smg2=postreturn.text,pcolor='d')
         elif a=='4':
             colorprint(smg2='请输入需要禁言的用户id',pcolor='bandg')
             yhid=input()
@@ -214,7 +269,7 @@ while True:
                 "duration_in_second":int(jysc),
                 })
             postreturn=requests.post(url,data=jsonfile,headers=headers)
-            colorprint(smg2=postreturn.text,pcolor='d')
+            colorize_json(smg2=postreturn.text,pcolor='d')
         elif a=='5':
             colorprint(smg2='请输入你的id',pcolor='bandg')
             yhid=input()
@@ -233,7 +288,7 @@ while True:
                 "type":int(pdlx)
                 })
             postreturn=requests.post(url,data=jsonfile,headers=headers)
-            colorprint(smg2=postreturn.text,pcolor='d')
+            colorize_json(smg2=postreturn.text,pcolor='d')
         elif a=='6':
             colorprint(smg2='请输入消息链接',pcolor='bandg')
             xxlj=input()
@@ -246,7 +301,7 @@ while True:
             headers={'content-type':"application/json;charset=utf-8"}
             jsonfile=json.dumps({'chat_id':int(pdid),'message_id':int(xxid)})
             postreturn=requests.post(url,data=jsonfile,headers=headers)
-            colorprint(smg2=postreturn.text,pcolor='d')
+            colorize_json(smg2=postreturn.text,pcolor='d')
             print('主要内容：first_name：发送者昵称，username：发送者短id，avatar：发送者头像，text：发送内容')
         elif a=="命令行":
             colorprint(smg2='>>>',pcolor='bandg')
@@ -261,7 +316,7 @@ while True:
                 headers={'content-type':"application/json;charset=utf-8"}
                 jsonfile=json.dumps(cmd2)
                 postreturn=requests.post(url,data=jsonfile,headers=headers)
-                colorprint(smg2=postreturn.text,pcolor='d')
+                colorize_json(smg2=postreturn.text,pcolor='d')
         elif a=='7':
             colorprint(smg2='请输入反馈信息',pcolor='bandg')
             c=input()
@@ -275,7 +330,7 @@ while True:
             else:
                 colorprint(smg2="'"+c+"'"+'发送失败！',pcolor='red')
         elif a=='help':
-            import pygame#此图片可以自定义，5.0后取消此功能
+            import pygame
             print('弹出的帮助窗口中有详细信息')
             pygame.init()
             pygame.display.set_caption("帮助窗口 回车关闭")
@@ -290,7 +345,7 @@ while True:
                         pygame.quit()
                         addmsg('如需其他错误码帮助，请打开https://open.fanbook.mobi/document/manage/doc/Bot%20API/API%E9%94%99%E8%AF%AF%E7%A0%81',color='aqua')
                         addmsg('—————————————————————————————————————————————',color='aqua')
-                        addmsg('关于：王大哥（#4562997）V4.3版',color='aqua')
+                        addmsg('关于：王大哥（#4562997）V4.2版',color='aqua')
                         addmsg('更新日期：2023/5/7  22：00 ',color='aqua')
         elif a== '8':
             colorprint(smg2='请输入频道id（如私信需要私聊id,可通过获取私聊id获取），获取方法：聊天框输入#，然后选择频道，发送后复制刚刚发送的蓝色频道名，复制后例如${#395848618357086556}，填写里面的数字395848618357086556即可',pcolor='bandg')
@@ -310,7 +365,7 @@ while True:
                 "parse_mode": "Fanbook"
                 })
                 postreturn=requests.post(url,data=jsonfile,headers=headers)
-                colorprint(smg2=postreturn.text,pcolor='d')
+                colorize_json(smg2=postreturn.text,pcolor='d')
         elif a=='9':#勋章及其功能（1添加）
             colorprint(smg2='输入需要操作的用户id',pcolor='bandg')
             xzuserid=input()
@@ -343,7 +398,7 @@ while True:
                 print("此勋章id：",random_string)
                 jsonfile=json.dumps({"guild_id":fwqid,"user_id":xzuserid,"card_id":random_string,"guild_credit":{"authority":{"icon":tb,"name":mc},"title":{"img":cytb},"slots":[[{"label":wbbt,"value":wbnr}],[{"img":xzbttb,"value":rysjzw},{"img":xzbttb2,"value":rysjzw2}]]}})
                 postreturn = requests.put(url, data=jsonfile, headers=headers)
-                colorprint(smg2=postreturn.text,pcolor='d')
+                colorize_json(smg2=postreturn.text,pcolor='d')
             elif tbgs=="3":
                 colorprint(smg2='勋章图标1',pcolor='bandg')
                 xzbttb=input()
@@ -363,7 +418,7 @@ while True:
                 print("此勋章id：",random_string)
                 jsonfile=json.dumps({"guild_id":fwqid,"user_id":xzuserid,"card_id":random_string,"guild_credit":{"authority":{"icon":tb,"name":mc},"title":{"img":cytb},"slots":[[{"label":wbbt,"value":wbnr}],[{"img":xzbttb,"value":rysjzw},{"img":xzbttb2,"value":rysjzw2},{"img":xzbttb3,"value":rysjzw3}]]}})
                 postreturn = requests.put(url, data=jsonfile, headers=headers)
-                colorprint(smg2=postreturn.text,pcolor='d')
+                colorize_json(smg2=postreturn.text,pcolor='d')
             else:
                 colorprint(smg2='勋章图标',pcolor='bandg')
                 xzbttb=input()
@@ -375,7 +430,7 @@ while True:
                 print("此勋章id：",random_string)
                 jsonfile=json.dumps({"guild_id":fwqid,"user_id":xzuserid,"card_id":random_string,"guild_credit":{"authority":{"icon":tb,"name":mc},"title":{"img":cytb},"slots":[[{"label":wbbt,"value":wbnr}],[{"img":xzbttb,"value":rysjzw}]]}})
                 postreturn = requests.put(url, data=jsonfile, headers=headers)
-                colorprint(smg2=postreturn.text,pcolor='d')
+                colorize_json(smg2=postreturn.text,pcolor='d')
         elif a=="10":
             colorprint(smg2='服务器id',pcolor='bandg')
             fwqid=input()
@@ -388,7 +443,7 @@ while True:
                 "user_id":int(yhid)
                 })
             postreturn=requests.post(url,data=jsonfile,headers=headers)
-            colorprint(smg2=postreturn.text,pcolor='d')
+            colorize_json(smg2=postreturn.text,pcolor='d')
         elif a=="11":
             colorprint(smg2='请输入服务器id',pcolor='bandg')
             guild_id=int(input(''))
@@ -423,7 +478,7 @@ while True:
                         "parse_mode": "Fanbook"
                     })
                     postreturn=requests.post(url,data=jsonfile,headers=headers)
-                    print(postreturn.text)
+                    colorize_json(postreturn.text)
         elif a=="12":
             colorprint(smg2='请输入频道id（如私信需要私聊id,可通过获取私聊id获取），获取方法：聊天框输入#，然后选择频道，发送后复制刚刚发送的蓝色频道名，复制后例如${#395848618357086556}，填写里面的数字395848618357086556即可',pcolor='bandg')
             pdid=input()
@@ -441,8 +496,15 @@ while True:
                 "text": xx,
                 })
                 postreturn=requests.post(url,data=jsonfile,headers=headers)
-                colorprint(smg2=postreturn.text,pcolor='d')
+                colorize_json(smg2=postreturn.text,pcolor='d')
                 time.sleep(cis)
+        elif a=="Debug":
+            colorprint(smg2="""
+                  警告
+请勿使用未知拓展或者调试程序，避免输入的内容被盗取
+                       """,pcolor='red')
+            file_path = input("请输入自定义代码文件路径:")
+            execute_python_file(file_path)
     except Exception as e:#检测错误
         error=traceback.format_exc()#获取错误信息
         variables = globals()
@@ -450,19 +512,20 @@ while True:
         encrypt_error_file()
         if 'pygame.error: video system not initialized' in error:#忽略错误
             continue
-        elif 'for int()' in error: #类型错误
+        elif 'for int()' in error:
             colorprint(smg2='遇到错误，请重试',pcolor='red')
             colorprint(smg2='错误诊断：数据类型错误，请输入整数',pcolor='red')
         elif 'list index out of range' in error:
             colorprint(smg2='遇到错误，请重试',pcolor='red')
             colorprint(smg2='错误诊断：数据处理错误，请输入正确的数据',pcolor='red')
-        else:#自己添加其他错误判断
+        else:
             colorprint(smg2='遇到错误，请重试',pcolor='red')
             colorprint(smg2='遇到未知错误：'+error,pcolor='red')
             colorprint(smg2='发生错误，请检查参数，是否发送错误报告(报告不包含机器人令牌等敏感数据,王大哥可见)(Y/N)',pcolor='bandg')
             cw=input()
             if cw=='Y':
-                    cwbg='错误模块：'+a+' 版本号：4.3'+'，错误代码：'+error
+                    cwbg='错误模块：'+a+' 版本号：4.5'+'，错误代码：'+error
+                    xwxx='{\"type\":\"richText\",\"title\":\"错误报告'+'3.1'+'\",\"document\":\"[{\\\"insert\\\":\\\"'+' '+'\\\"}]\"}'#此段富文本不支持
                     url='https://a1.fanbook.mobi/api/bot/0f2de7ac66727cd9fcec1ee43559c561f6abf3f1e202c5a06c2ae4a3f6cf94ab795fbfbe39ad311a18ad1ff314388d1c/sendMessage'#错误发送到私密频道
                     headers = {'content-type':"application/json;charset=utf-8"}
                     jsonfile=json.dumps({"chat_id":448843628261933056,"text":cwbg})
