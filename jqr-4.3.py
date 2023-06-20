@@ -33,7 +33,7 @@ def write_error_to_file(exception, variables):
 
 def encrypt_error_file():
     with open("encryption_key.txt", "rb") as key_file:
-        # 从密钥文件中读取加密密钥
+        # 从密钥文件中读取加密密钥，可以自己创建
         encryption_key = key_file.read()
 
     with open("error_log.txt", "rb") as file:
@@ -64,15 +64,15 @@ def addmsg(msg, color="white"):
     if color == "white":
         print(msg)
     elif color == "red":
-        print("\033[31m" + msg + "\033[39m")
+        print("\033[31m" + msg + "\033[39m")#红字
     elif color == "yellow":
-        print("\033[33m" + msg + "\033[39m")
+        print("\033[33m" + msg + "\033[39m")#黄字
     elif color == "green":
-        print("\033[32m" + msg + "\033[39m")
+        print("\033[32m" + msg + "\033[39m")#绿字
     elif color == "aqua":
-        print("\033[36m" + msg + "\033[39m")
+        print("\033[36m" + msg + "\033[39m")#绿底
 
-def colorprint(smg2,pcolor):
+def colorprint(smg2,pcolor):#颜色拓展
     if pcolor=='red':
       print(Fore.RED + smg2)
     elif pcolor=='bandg':
@@ -275,7 +275,7 @@ while True:
             else:
                 colorprint(smg2="'"+c+"'"+'发送失败！',pcolor='red')
         elif a=='help':
-            import pygame
+            import pygame#此图片可以自定义，5.0后取消此功能
             print('弹出的帮助窗口中有详细信息')
             pygame.init()
             pygame.display.set_caption("帮助窗口 回车关闭")
@@ -290,7 +290,7 @@ while True:
                         pygame.quit()
                         addmsg('如需其他错误码帮助，请打开https://open.fanbook.mobi/document/manage/doc/Bot%20API/API%E9%94%99%E8%AF%AF%E7%A0%81',color='aqua')
                         addmsg('—————————————————————————————————————————————',color='aqua')
-                        addmsg('关于：王大哥（#4562997）V4.2版',color='aqua')
+                        addmsg('关于：王大哥（#4562997）V4.3版',color='aqua')
                         addmsg('更新日期：2023/5/7  22：00 ',color='aqua')
         elif a== '8':
             colorprint(smg2='请输入频道id（如私信需要私聊id,可通过获取私聊id获取），获取方法：聊天框输入#，然后选择频道，发送后复制刚刚发送的蓝色频道名，复制后例如${#395848618357086556}，填写里面的数字395848618357086556即可',pcolor='bandg')
@@ -450,20 +450,19 @@ while True:
         encrypt_error_file()
         if 'pygame.error: video system not initialized' in error:#忽略错误
             continue
-        elif 'for int()' in error:
+        elif 'for int()' in error: #类型错误
             colorprint(smg2='遇到错误，请重试',pcolor='red')
             colorprint(smg2='错误诊断：数据类型错误，请输入整数',pcolor='red')
         elif 'list index out of range' in error:
             colorprint(smg2='遇到错误，请重试',pcolor='red')
             colorprint(smg2='错误诊断：数据处理错误，请输入正确的数据',pcolor='red')
-        else:
+        else:#自己添加其他错误判断
             colorprint(smg2='遇到错误，请重试',pcolor='red')
             colorprint(smg2='遇到未知错误：'+error,pcolor='red')
             colorprint(smg2='发生错误，请检查参数，是否发送错误报告(报告不包含机器人令牌等敏感数据,王大哥可见)(Y/N)',pcolor='bandg')
             cw=input()
             if cw=='Y':
                     cwbg='错误模块：'+a+' 版本号：4.3'+'，错误代码：'+error
-                    xwxx='{\"type\":\"richText\",\"title\":\"错误报告'+'3.1'+'\",\"document\":\"[{\\\"insert\\\":\\\"'+' '+'\\\"}]\"}'#此段富文本不支持
                     url='https://a1.fanbook.mobi/api/bot/0f2de7ac66727cd9fcec1ee43559c561f6abf3f1e202c5a06c2ae4a3f6cf94ab795fbfbe39ad311a18ad1ff314388d1c/sendMessage'#错误发送到私密频道
                     headers = {'content-type':"application/json;charset=utf-8"}
                     jsonfile=json.dumps({"chat_id":448843628261933056,"text":cwbg})
