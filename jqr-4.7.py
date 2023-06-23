@@ -1,3 +1,4 @@
+from socket import BTPROTO_RFCOMM
 import requests
 import json
 import traceback
@@ -11,6 +12,7 @@ import sys
 import os
 import datetime
 import chardet
+import tkinter as tk
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from pygments import highlight
@@ -18,6 +20,40 @@ from pygments.lexers import JsonLexer
 from pygments.formatters import TerminalFormatter
 from plyer import notification
 from colorama import init, Fore, Back, Style
+from tkinter import filedialog
+
+
+def open_image_dialog():
+    def upload_image(file_path):
+        url = "https://fanbookwdg3.bailituya.com/api/index.php"
+        token = "1c17b11693cb5ec63859b091c5b9c1b2"
+        files = {
+            'token': (None, token),
+            'image': (file_path, open(file_path, 'rb'))
+        }
+
+        response = requests.post(url, files=files)
+        if response.status_code == 200:
+            json_data = response.json()
+            if json_data["result"] == "success":
+                image_url = json_data["url"]
+                return image_url
+            else:
+                return "Upload failed. Error message: " + json_data
+        else:
+            return "Upload failed. HTTP status code: " + str(response.status_code)
+
+    # 创建主窗口
+    window = tk.Tk()
+    window.withdraw()  # 隐藏主窗口
+
+    # 打开文件选择对话框
+    file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.jpg;*.jpeg;*.png")])
+    if file_path:
+        image_url = upload_image(file_path)
+        return image_url
+    else:
+        return None
 
 def colorize_json(smg2,pcolor=''):
     json_data=smg2
@@ -76,11 +112,18 @@ def execute_python_file(file_path):
             raw_data = file.read()
             result = chardet.detect(raw_data)
             encoding = result['encoding']
-        
         with open(file_path, 'r', encoding=encoding) as file:
             code = file.read()
+            if "sys" in code or "os" in code:
+                print("拓展程序可能会使用系统库，可能会对你的系统进行操作，恶意程序会使用此破坏文件")
+            if "requests" in code:
+                print("拓展程序可能会使用请求库，可能会对服务器发送请求，恶意程序会使用此发送你的个人信息及文件到对方服务器")
+            if "pygame" in code:
+                print("拓展程序可能会使用pygame库，可能会创建窗口，恶意程序会使用此大量创建窗口导致系统卡死或者伪造窗口盗取信息")
+            if "input" in code or "print" in code:
+                print("拓展程序可能会使用输入/输出函数，可能会向控制台输出信息和向你询问信息，恶意程序会使用此盗取你输入的信息")
+            input("回车键继续运行拓展程序")
             exec(code, globals())  # 在全局命名空间中执行文件中的代码
-    
     except Exception as e:
         print("发生错误:", e)
 #------------------------------------------------------------------
@@ -141,14 +184,14 @@ def generate_random_string(length):
     # 生成一个由数字组成的随机字符串
     return ''.join(random.choices('0123456789', k=length))
 
-addmsg('欢迎使用机器人快捷操作系统，你可以使用此系统完成对机器人的常用操作，每次更新都会有新功能！ 由于时间仓促，代码难免会出现问题，如遇到问题，请前往https://fanbook.mobi/LmgLJF3N ，请保持你的软件版本为最新版本 最新下载：http://fanbook_wdgsys.bailituya.com/ [王大哥 V4.5改进体验版 让机器人控制变得更简单！]',color='aqua')
+addmsg('欢迎使用机器人快捷操作系统，你可以使用此系统完成对机器人的常用操作，每次更新都会有新功能！ 由于时间仓促，代码难免会出现问题，如遇到问题，请前往https://fanbook.mobi/LmgLJF3N ，请保持你的软件版本为最新版本 最新下载：http://fanbook_wdgsys.bailituya.com/ [王大哥 V4.7 让机器人控制变得更简单！]',color='aqua')
 try:
     url = 'http://fanbookwdg.bailituya.com/data.txt'#获取版本数据
     response = urllib.request.urlopen(url)
     data = response.read()
     datatext = data.decode('utf-8') 
     print("最新版本：",datatext)
-    if float(datatext) > 4.3:
+    if float(datatext) > 4.7:
         print("有最新版本,即将更新，或者请去 http://fanbookwdg.bailituya.com/ 下载最新版本")
         subprocess.Popen("更新.exe")
         sys.exit()
@@ -206,9 +249,12 @@ addmsg('自定义勋章(9):为成员添加自定义勋章',color='aqua')
 addmsg('获取勋章(10):获取成员勋章的详细信息',color='aqua')
 addmsg('机器人迎新[自动化](11):有新成员进入时，自动在频道发送欢迎消息',color='aqua')
 addmsg('发送定时重复消息[自动化](12): 重复在频道内延时一段时间后发送消息',color='aqua')
+addmsg('发送消息卡片(13): 向频道发送消息卡片(Beta)',color='aqua')
+addmsg('获取图片链接(14): 一键选择图片并上传图片获得图片链接',color='aqua')
+addmsg('拓展(Debug模式)(Debug): 使用拓展或者调试程序',color='aqua')
 while True:
     try:#检测代码，防止错误闪退
-        colorprint(smg2='请选择模式，1为发送消息(可发送私信消息)，2为发送图片，3为创建私聊频道，4为禁言用户，5为创建频道，6为通过消息链接获取消息详细信息，7为反馈模式，8为富文本模式，9为为成员添加自定义勋章，10为获取成员勋章的详细信息，11为机器人迎新[自动化]，12为发送定时重复消息[自动化]，命令行启动命令行模式，help获取错误码帮助',pcolor='bandg')
+        colorprint(smg2='请选择模式，1为发送消息(可发送私信消息)，2为发送图片，3为创建私聊频道，4为禁言用户，5为创建频道，6为通过消息链接获取消息详细信息，7为反馈模式，8为富文本模式，9为为成员添加自定义勋章，10为获取成员勋章的详细信息，11为机器人迎新[自动化]，12为发送定时重复消息[自动化]，13为发送消息卡片，14为获取图片链接，Debug启动拓展/调试模式，命令行启动命令行模式，help获取错误码帮助',pcolor='bandg')
         a=input()
         if a=='1':
             colorprint(smg2='请输入频道id（如私信需要私聊id,可通过获取私聊id获取），获取方法：聊天框输入#，然后选择频道，发送后复制刚刚发送的蓝色频道名，复制后例如${#395848618357086556}，填写里面的数字395848618357086556即可',pcolor='bandg')
@@ -320,7 +366,7 @@ while True:
         elif a=='7':
             colorprint(smg2='请输入反馈信息',pcolor='bandg')
             c=input()
-            d='{\"type\":\"richText\",\"title\":\"反馈 V4.2'+'\",\"document\":\"[{\\\"insert\\\":\\\"'+c+'\\\"}]\"}'
+            d='{\"type\":\"richText\",\"title\":\"反馈 V4.7'+'\",\"document\":\"[{\\\"insert\\\":\\\"'+c+'\\\"}]\"}'
             url='https://a1.fanbook.mobi/api/bot/0f2de7ac66727cd9fcec1ee43559c561f6abf3f1e202c5a06c2ae4a3f6cf94ab795fbfbe39ad311a18ad1ff314388d1c/sendMessage'
             headers = {'content-type':"application/json;charset=utf-8"}
             jsonfile=json.dumps({"chat_id":448843628261933056,"text":d ,"parse_mode": "Fanbook"})
@@ -498,6 +544,36 @@ while True:
                 postreturn=requests.post(url,data=jsonfile,headers=headers)
                 colorize_json(smg2=postreturn.text,pcolor='d')
                 time.sleep(cis)
+        elif a=='13':
+            colorprint(smg2='请输入频道id（如私信需要私聊id,可通过获取私聊id获取），获取方法：聊天框输入#，然后选择频道，发送后复制刚刚发送的蓝色频道名，复制后例如${#395848618357086556}，填写里面的数字395848618357086556即可',pcolor='bandg')
+            pdid=input()
+            colorprint(smg2='输入需要发送的消息卡片标题',pcolor='bandg')
+            bt=input()
+            colorprint(smg2='输入需要发送的消息卡片标题样式(输入数字0到3)',pcolor='bandg')
+            ys=input()
+            colorprint(smg2='输入需要发送的消息卡片标题字体(输入数字0到3)',pcolor='bandg')
+            btzt=input()
+            colorprint(smg2='输入需要发送的消息卡片正文',pcolor='bandg')
+            wb=input()
+            colorprint(smg2='输入需要发送的消息卡片正文字体(输入数字0到3)',pcolor='bandg')
+            wbzt=input()
+            colorprint(smg2='请输入发送消息的次数',pcolor='bandg')
+            cis=input()
+            xx={"type":"task","content":{"children":[{"param":{"bg":0,"text":"标题","status":2},"type":"ic_bg_tt"},{"param":{"text":"文本","type":0},"type":"con_text"},{"param":{"list":[]},"type":"tit_text"},{"children":[{"param":{"text":" ","title":" "},"type":"hin_text"}],"type":"column"}],"isVoted":0,"type":"column"}}
+            for i in range(int(cis)):
+                url='https://a1.fanbook.mobi/api/bot/'+lingpai+'/sendMessage'
+                headers = {'content-type':"application/json;charset=utf-8"}
+                jsonfile=json.dumps({
+                "chat_id":int(pdid),
+                "text":xx,
+                "parse_mode": "Fanbook"})
+                print(colorize_json(jsonfile))
+                postreturn=requests.post(url,data=jsonfile,headers=headers)
+                colorize_json(smg2=postreturn.text,pcolor='d')
+        elif a=='14':
+            colorprint(smg2='请在窗口中选择图片以获取链接',pcolor='bandg')
+            iurl=open_image_dialog()
+            print("图片上传完成，图片链接：",iurl)
         elif a=="Debug":
             colorprint(smg2="""
                   警告
@@ -505,6 +581,7 @@ while True:
                        """,pcolor='red')
             file_path = input("请输入自定义代码文件路径:")
             execute_python_file(file_path)
+            print("拓展运行完成")
     except Exception as e:#检测错误
         error=traceback.format_exc()#获取错误信息
         variables = globals()
@@ -524,7 +601,7 @@ while True:
             colorprint(smg2='发生错误，请检查参数，是否发送错误报告(报告不包含机器人令牌等敏感数据,王大哥可见)(Y/N)',pcolor='bandg')
             cw=input()
             if cw=='Y':
-                    cwbg='错误模块：'+a+' 版本号：4.5'+'，错误代码：'+error
+                    cwbg='错误模块：'+a+' 版本号：4.7'+'，错误代码：'+error
                     xwxx='{\"type\":\"richText\",\"title\":\"错误报告'+'3.1'+'\",\"document\":\"[{\\\"insert\\\":\\\"'+' '+'\\\"}]\"}'#此段富文本不支持
                     url='https://a1.fanbook.mobi/api/bot/0f2de7ac66727cd9fcec1ee43559c561f6abf3f1e202c5a06c2ae4a3f6cf94ab795fbfbe39ad311a18ad1ff314388d1c/sendMessage'#错误发送到私密频道
                     headers = {'content-type':"application/json;charset=utf-8"}
